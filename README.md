@@ -15,22 +15,22 @@ unsafe extern "C" fn fngmod13_open(state: *mut c_void) -> i32 {
 		println!("Hello there!");
 		Ok(0)
 	});
-	setfield(state, -2, cstr!("test_immutable_closure"));
+	lua::setfield(state, -2, lua::cstr!("test_immutable_closure"));
 	fn  test_function(state: lua_State) -> Result {
 		println!("Hello there, but from functuin, I guess.");
 		Ok(0)
 	}
-	pushfunction(state, test_function);
-	setfield(state, -2, cstr!("test_immutable_function"));
+	lua::pushfunction(state, test_function);
+	lua::setfield(state, -2, lua::cstr!("test_immutable_function"));
 
 	let  mut  counter = 0;
-	pushfunction_mut(state, move |_| {
+	lua::pushfunction_mut(state, move |_| {
 		println!("Here is your counter!: {}", counter);
-		pushinteger(state, counter);
+		lua::pushinteger(state, counter);
 		counter += 1;
 		Ok(1)
 	});
-	setfield(state, -2, cstr!("test_mutable_closure"));
-	setfield(state, lua::GLOBALSINDEX, cstr!("tests"));
+	lua::setfield(state, -2, lua::cstr!("test_mutable_closure"));
+	lua::setfield(state, lua::GLOBALSINDEX, lua::cstr!("tests"));
 }
 ```
