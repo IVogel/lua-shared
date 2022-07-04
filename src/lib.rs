@@ -232,7 +232,7 @@ extern "C" {
 
     /// miscellaneous functions
     #[link_name = "lua_error"]
-    fn lua_error(state: lua_State) -> i32;
+    pub fn error(state: lua_State) -> i32;
     // #[link_name = "lua_next"]
     // fn lua_next(state: lua_State, index: i32) -> i32;
     // #[link_name = "lua_concat"]
@@ -287,11 +287,11 @@ where
         match (&mut *callback_ptr.cast::<FUNC>())(state) {
             Ok(nrets) => nrets,
             Err(err) => {
-                let error = err.to_string();
+                let error_str = err.to_string();
                 std::mem::drop(err);
-                pushlstring(state, error.as_bytes().as_ptr(), error.as_bytes().len());
-                std::mem::drop(error);
-                lua_error(state);
+                pushlstring(state, error_str.as_bytes().as_ptr(), error_str.as_bytes().len());
+                std::mem::drop(error_str);
+                error(state);
                 unreachable_unchecked();
             }
         }
