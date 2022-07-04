@@ -1,6 +1,6 @@
 
 # lua-shared
-Really simple wrapper around lua_shared(\_srv\_) that tries to not fuck your brains.
+Really simple wrapper around lua_shared(\_srv) that tries not to fuck your brains.
 
 Example usecase:
 ```rust
