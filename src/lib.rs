@@ -100,8 +100,8 @@ extern "C" {}
 extern "C" {}
 
 extern "C" {
-    /// state manipulation
-    
+    // state manipulation
+
     /// Creates a new Lua state.
     /// It calls `lua_newstate` with an allocator based on the standard C realloc function and then sets a panic function that prints an error message to the standard error output in case of fatal errors.
     /// 
@@ -119,7 +119,7 @@ extern "C" {
     #[link_name = "lua_newthread"]
     pub fn newthread(state: lua_State) -> lua_State;
 
-    /// basic stack manipulation
+    // basic stack manipulation
     
     /// Returns the index of the top element in the stack. Because indices start at 1, this result is equal to the number of elements in the stack; in particular, 0 means an empty stack.
     #[link_name = "lua_gettop"]
@@ -148,7 +148,7 @@ extern "C" {
     #[link_name = "lua_checkstack"]
     pub fn checkstack(state: lua_State, size: i32) -> bool;
 
-    /// access functions (stack -> C)
+    // access functions (stack -> C)
 
     /// Returns `true` if the value at the given index is a number or a string convertible to a number, and `false` otherwise.
     #[link_name = "lua_isnumber"]
@@ -223,7 +223,7 @@ extern "C" {
     #[link_name = "lua_topointer"]
     pub fn topointer(state: lua_State, index: i32) -> *const c_void;
 
-    /// push functions (C -> stack)
+    // push functions (C -> stack)
     
     /// Pushes a nil value onto the stack.
     #[link_name = "lua_pushnil"]
@@ -268,7 +268,7 @@ extern "C" {
     #[link_name = "lua_pushthread"]
     pub fn pushthread(state: lua_State) -> i32;
 
-    /// get functions (Lua -> stack)
+    // get functions (Lua -> stack)
     
     /// Pushes onto the stack the value `t[k]`, where `t` is the value at the given valid index and `k` is the value at the top of the stack.
     /// 
@@ -308,7 +308,7 @@ extern "C" {
     #[link_name = "lua_getfenv"]
     pub fn getfenv(state: lua_State, index: i32);
 
-    /// set functions (stack -> Lua)
+    // set functions (stack -> Lua)
 
     /// Does the equivalent to `t[k] = v`, where `t` is the value at the given valid index, `v` is the value at the top of the stack, and `k` is the value just below the top.
     /// 
@@ -335,7 +335,7 @@ extern "C" {
     #[link_name = "lua_setfenv"]
     pub fn setfenv(state: lua_State, index: i32) -> i32;
 
-    /// `load' and `call' functions (load and run Lua code)
+    // `load' and `call' functions (load and run Lua code)
     
     /// Calls a function. 
     /// 
@@ -351,6 +351,16 @@ extern "C" {
     /// Any error inside the called function is propagated upwards (with a `longjmp`). 
     #[link_name = "lua_call"]
     pub fn call(state: lua_State, nargs: i32, nrets: i32);
+    /// Calls a function in protected mode.
+    /// 
+    /// Both nargs and nresults have the same meaning as in [`call`] (`lua_call`).
+    /// If there are no errors during the call, [`pcall`] (`lua_pcall`) behaves exactly like [`call`] (`lua_call`).
+    /// However, if there is any error, [`pcall`] (`lua_pcall`) catches it, pushes a single value on the stack (the error message), and returns an error code.
+    /// Like [`call`] (`lua_call`), [`pcall`] (`lua_pcall`) always removes the function and its arguments from the stack.
+    /// 
+    /// If `errfunc` is 0, then the error message returned on the stack is exactly the original error message.
+    /// Otherwise, `errfunc` is the stack index of an _error handler function_. (In the current implementation, this index cannot be a pseudo-index.)
+    /// In case of runtime errors, this function will be called with the error message and its return value will be the message returned on the stack by [`pcall`] (`lua_pcall`).
     #[link_name = "lua_pcall"]
     pub fn pcall(state: lua_State, nargs: i32, nrets: i32, errfunc: i32) -> Status;
     fn lua_loadx(
@@ -362,7 +372,9 @@ extern "C" {
     ) -> Status;
     fn lua_dump(state: lua_State, writer: lua_Writer, userdata: *mut c_void) -> i32;
 
-    /// miscellaneous functions
+    // miscellaneous functions 
+
+    /// Generates a Lua error. The error message (which can actually be a Lua value of any type) must be on the stack top. This function does a long jump, and therefore never returns. (see [`luaL_error`](https://www.lua.org/manual/5.1/manual.html#luaL_error)). 
     #[link_name = "lua_error"]
     pub fn error(state: lua_State) -> i32;
     // #[link_name = "lua_next"]
@@ -370,9 +382,16 @@ extern "C" {
     // #[link_name = "lua_concat"]
     // fn lua_concat(state: lua_State, index: i32);
 
-    /// lauxlib
+    // lauxlib
+
+    /// Checks whether the function argument `index` is a string and returns this string; if `length` is not NULL fills `*length` with the string's length.
+    /// 
+    /// This function uses [`tolstring`] (`lua_tolstring`) to get its result, so all conversions and caveats of that function apply here. 
     #[link_name = "luaL_checklstring"]
     pub fn Lchecklstring(state: lua_State, index: i32, length: &mut usize) -> *const u8;
+    /// If the function argument `index` is a string, returns this string. If this argument is absent or is **nil**, returns `default`. Otherwise, raises an error.
+    /// 
+    /// If `length` is not `NULL`, fills the position `*length` with the results's length. 
     #[link_name = "luaL_optlstring"]
     pub fn Loptlstring(
         state: lua_State,
@@ -380,29 +399,51 @@ extern "C" {
         default: *const u8,
         length: &mut usize,
     ) -> *const u8;
+    /// Checks whether the function argument `index` is a number and returns this number. 
     #[link_name = "luaL_checknumber"]
     pub fn Lchecknumber(state: lua_State, index: i32) -> f64;
+    /// If the function argument `index` is a number, returns this number. If this argument is absent or is **nil**, returns `default`. Otherwise, raises an error.
     #[link_name = "luaL_optnumber"]
     pub fn Loptnumber(state: lua_State, index: i32, default: f64) -> f64;
+    /// Checks whether the function argument `index` is a number and returns this number cast to a [`lua_Integer`](https://www.lua.org/manual/5.1/manual.html#lua_Integer). 
     #[link_name = "luaL_checkinteger"]
     pub fn Lcheckinteger(state: lua_State, index: i32) -> isize;
+    /// If the function argument `index` is a number, returns this number cast to a [`lua_Integer`](https://www.lua.org/manual/5.1/manual.html#lua_Integer).
+    /// If this argument is absent or is **nil**, returns `default`. Otherwise, raises an error. 
     #[link_name = "luaL_optinteger"]
     pub fn Loptinteger(state: lua_State, index: i32, default: isize) -> isize;
-
+    /// Grows the stack size to `top + size` elements, raising an error if the stack cannot grow to that size. `msg` is an additional text to go into the error message.
     #[link_name = "luaL_checkstack"]
     pub fn Lcheckstack(state: lua_State, size: i32, msg: *const u8);
+    /// Checks whether the function argument `index` has type `typ`. See [`lua_type`](https://www.lua.org/manual/5.1/manual.html#lua_type) for the encoding of types for `typ`. 
     #[link_name = "luaL_checktype"]
     pub fn Lchecktype(state: lua_State, index: i32, typ: i32);
+    /// Checks whether the function has an argument of any type (including **nil**) at position `index`.
     #[link_name = "luaL_checkany"]
     pub fn Lcheckany(state: lua_State, index: i32);
 
+    /// If the registry already has the key `type_name`, returns `false`. Otherwise, creates a new table to be used as a metatable for userdata, adds it to the registry with key `type_name`, and returns `true`.
+    /// 
+    /// In both cases pushes onto the stack the final value associated with `type_name` in the registry. 
     #[link_name = "luaL_newmetatable"]
     pub fn Lnewmetatable(state: lua_State, type_name: *const u8) -> bool;
+    /// Checks whether the function argument `index` is a userdata of the type `type_name` (see [`Lnewmetatable`]). 
     #[link_name = "luaL_checkudata"]
     pub fn Lcheckudata(state: lua_State, index: i32, type_name: *const u8) -> *mut c_void;
 
+    /// Pushes onto the stack a string identifying the current position of the control at level `level` in the call stack. Typically this string has the following format:
+    /// ```text
+    ///     chunkname:currentline:
+    /// ```
+    /// Level 0 is the running function, level 1 is the function that called the running function, etc.
+    /// 
+    /// This function is used to build a prefix for error messages. 
     #[link_name = "luaL_where"]
     pub fn Lpush_where(state: lua_State, level: i32);
+    /// Raises an error. The error message format is given by `fmt` plus any extra arguments, following the same rules of [`lua_pushfstring`](https://www.lua.org/manual/5.1/manual.html#lua_pushfstring).
+    /// It also adds at the beginning of the message the file name and the line number where the error occurred, if this information is available.
+    /// 
+    /// This function never returns, but it is an idiom to use it in C functions as `return luaL_error(args)`. 
     #[link_name = "luaL_error"]
     pub fn Lerror(state: lua_State, fmt: *const u8, ...) -> i32;
 }
@@ -448,7 +489,7 @@ where
     pushcclosure(state, call_callback::<FUNC>, 1);
 }
 
-/// Adds pure rust function as a callback to lua.
+/// Pushes rust function/closure to lua stack.
 /// # Example
 /// ```
 /// let state = newstate();
