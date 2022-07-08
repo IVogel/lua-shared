@@ -1,6 +1,6 @@
 #![allow(non_camel_case_types)]
 
-use std::{ffi::c_void, hint::unreachable_unchecked};
+use std::{ffi::c_void, hint::unreachable_unchecked, ptr::null_mut};
 
 mod loadx;
 pub use loadx::loadx;
@@ -482,7 +482,7 @@ where
     where
         FUNC: 'static + FnMut(lua_State) -> Result,
     {
-        let callback_ptr = touserdata(state, upvalueindex!(1));
+        let callback_ptr = if std::mem::size_of::<FUNC>() > 0 {touserdata(state, upvalueindex!(1))} else {null_mut()};
         match (&mut *callback_ptr.cast::<FUNC>())(state) {
             Ok(nrets) => nrets,
             Err(err) => {
@@ -496,10 +496,10 @@ where
         }
     }
 
-    let udata_ptr = newuserdata(state, std::mem::size_of::<FUNC>()).cast::<FUNC>();
-    udata_ptr.write(callback);
-
+    
     if std::mem::size_of::<FUNC>() > 0 {
+        let udata_ptr = newuserdata(state, std::mem::size_of::<FUNC>()).cast::<FUNC>();
+        udata_ptr.write(callback);
         unsafe extern "C" fn cleanup_callback<FUNC>(state: lua_State) -> i32
         where
             FUNC: 'static + FnMut(lua_State) -> Result,
@@ -512,6 +512,8 @@ where
         pushcclosure(state, cleanup_callback::<FUNC>, 0);
         setfield(state, -2, cstr!("__gc"));
         setmetatable(state, -2);
+        pushcclosure(state, call_callback::<FUNC>, 1);
+    } else {
+        pushcclosure(state, call_callback::<FUNC>, 0);
     }
-    pushcclosure(state, call_callback::<FUNC>, 1);
 }
