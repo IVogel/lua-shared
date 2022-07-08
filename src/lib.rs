@@ -496,21 +496,24 @@ where
         }
     }
 
-    unsafe extern "C" fn cleanup_callback<FUNC>(state: lua_State) -> i32
-    where
-        FUNC: 'static + FnMut(lua_State) -> Result,
-    {
-        let callback_ptr = touserdata(state, 1);
-        let _ = callback_ptr.cast::<FUNC>().read();
-        0
-    }
-
     let udata_ptr = newuserdata(state, std::mem::size_of::<FUNC>()).cast::<FUNC>();
     udata_ptr.write(callback);
 
-    createtable(state, 0, 1);
-    pushcclosure(state, cleanup_callback::<FUNC>, 0);
-    setfield(state, -2, cstr!("__gc"));
-    setmetatable(state, -2);
-    pushcclosure(state, call_callback::<FUNC>, 1);
+    if std::mem::size_of::<FUNC>() > 0 {
+        unsafe extern "C" fn cleanup_callback<FUNC>(state: lua_State) -> i32
+        where
+            FUNC: 'static + FnMut(lua_State) -> Result,
+        {
+            let callback_ptr = touserdata(state, 1);
+            let _ = callback_ptr.cast::<FUNC>().read();
+            0
+        }
+        createtable(state, 0, 1);
+        pushcclosure(state, cleanup_callback::<FUNC>, 0);
+        setfield(state, -2, cstr!("__gc"));
+        setmetatable(state, -2);
+        pushcclosure(state, call_callback::<FUNC>, 1);
+    } else {
+        pushcclosure(state, call_callback::<FUNC>, 0);
+    }
 }
