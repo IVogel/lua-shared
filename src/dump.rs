@@ -10,7 +10,12 @@ pub unsafe fn dump<WRITER>(
 where
     WRITER: std::io::Write,
 {
-    unsafe extern "C" fn writer_callback<WRITER>(_: lua_State, data: *const u8, size: usize, userdata: *mut c_void) -> i32
+    unsafe extern "C" fn writer_callback<WRITER>(
+        _: lua_State,
+        data: *const u8,
+        size: usize,
+        userdata: *mut c_void,
+    ) -> i32
     where
         WRITER: std::io::Write,
     {

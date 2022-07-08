@@ -1,6 +1,6 @@
 use std::{ffi::c_void, hint::unreachable_unchecked};
 
-use crate::{lua_State, LError, lua_loadx, Status, tolstring, pop};
+use crate::{lua_State, lua_loadx, pop, tolstring, LError, Status};
 
 pub unsafe fn loadx<READER>(
     state: lua_State,
@@ -18,7 +18,11 @@ where
         buffer: [u8; 4096],
         reader: &'a mut READER,
     }
-    unsafe extern "C" fn reader_callback<READER>(_: lua_State, userdata: *mut c_void, size: &mut usize) -> *const u8
+    unsafe extern "C" fn reader_callback<READER>(
+        _: lua_State,
+        userdata: *mut c_void,
+        size: &mut usize,
+    ) -> *const u8
     where
         READER: std::io::Read,
     {
