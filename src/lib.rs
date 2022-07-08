@@ -447,7 +447,34 @@ extern "C" {
     pub fn Lerror(state: lua_State, fmt: *const u8, ...) -> i32;
 }
 
-unsafe fn create_callback<FUNC>(state: lua_State, callback: FUNC)
+/// Pushes rust function/closure to lua stack.
+/// # Example
+/// ```
+/// let state = newstate();
+/// createtable(state, 0, 2);
+/// pushfunction(state, |_| {
+///     println!("Hello there!");
+///     Ok(0)
+/// });
+/// setfield(state, -2, cstr!("test_immutable_closure"));
+/// fn test_function(state: lua_State) -> Result {
+///     println!("Hello there, but from functuin, I guess.");
+///     Ok(0)
+/// }
+/// pushfunction(state, test_function);
+/// setfield(state, -2, cstr!("test_immutable_function"));
+/// 
+/// let mut counter = 0;
+/// pushfunction_mut(state, move |_| {
+///     println!("Here is yout counter!: {}", counter);
+///     pushinteger(state, counter);
+///     counter += 1;
+///     Ok(1)
+/// });
+/// setfield(state, -2, cstr!("test_mutable_closure"));
+/// setfield(state, GLOBALSINDEX, cstr!("tests"));
+/// ```
+pub unsafe fn pushfunction<FUNC>(state: lua_State, callback: FUNC)
 where
     FUNC: 'static + FnMut(lua_State) -> Result,
 {
@@ -486,38 +513,4 @@ where
     setfield(state, -2, cstr!("__gc"));
     setmetatable(state, -2);
     pushcclosure(state, call_callback::<FUNC>, 1);
-}
-
-/// Pushes rust function/closure to lua stack.
-/// # Example
-/// ```
-/// let state = newstate();
-/// createtable(state, 0, 2);
-/// pushfunction(state, |_| {
-///     println!("Hello there!");
-///     Ok(0)
-/// });
-/// setfield(state, -2, cstr!("test_immutable_closure"));
-/// fn test_function(state: lua_State) -> Result {
-///     println!("Hello there, but from functuin, I guess.");
-///     Ok(0)
-/// }
-/// pushfunction(state, test_function);
-/// setfield(state, -2, cstr!("test_immutable_function"));
-/// 
-/// let mut counter = 0;
-/// pushfunction_mut(state, move |_| {
-///     println!("Here is yout counter!: {}", counter);
-///     pushinteger(state, counter);
-///     counter += 1;
-///     Ok(1)
-/// });
-/// setfield(state, -2, cstr!("test_mutable_closure"));
-/// setfield(state, GLOBALSINDEX, cstr!("tests"));
-/// ```
-pub unsafe fn pushfunction<FUNC>(state: lua_State, func: FUNC)
-where
-    FUNC: 'static + FnMut(lua_State) -> Result,
-{
-    create_callback(state, func);
 }
