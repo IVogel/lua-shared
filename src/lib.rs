@@ -512,8 +512,6 @@ where
         pushcclosure(state, cleanup_callback::<FUNC>, 0);
         setfield(state, -2, cstr!("__gc"));
         setmetatable(state, -2);
-        pushcclosure(state, call_callback::<FUNC>, 1);
-    } else {
-        pushcclosure(state, call_callback::<FUNC>, 0);
     }
+    pushcclosure(state, call_callback::<FUNC>, 1);
 }
