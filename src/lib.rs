@@ -445,6 +445,12 @@ extern "C" {
     /// This function never returns, but it is an idiom to use it in C functions as `return luaL_error(args)`.
     #[link_name = "luaL_error"]
     pub fn Lerror(state: lua_State, fmt: *const u8, ...) -> i32;
+
+    /// Loads a buffer as a Lua chunk. This function uses [`lua_load`](https://www.lua.org/manual/5.1/manual.html#lua_load) to load the chunk in the buffer pointed to by `buffer` with size `size`.
+    /// 
+    /// This function returns the same results as [`lua_load`](https://www.lua.org/manual/5.1/manual.html#lua_load). `name` is the chunk name, used for debug information and error messages. The string mode works as in function [`lua_load`](https://www.lua.org/manual/5.1/manual.html#lua_load). 
+    #[link_name = "luaL_loadbufferx"]
+    pub fn Lloadbufferx(state: lua_State, buffer: *const u8, size: usize, name: *const u8, mode: *const u8) -> Status;
 }
 
 /// Pushes rust function/closure to lua stack.
