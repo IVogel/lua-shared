@@ -420,6 +420,9 @@ extern "C" {
     /// Checks whether the function has an argument of any type (including **nil**) at position `index`.
     #[link_name = "luaL_checkany"]
     pub fn Lcheckany(state: lua_State, index: i32);
+    /// Checks whether `cond` is true. If not, raises an error with the following message, where `func` is retrieved from the call stack: 
+    #[link_name = "luaL_argcheck"]
+    pub fn Largcheck(state: lua_State, cond: bool, index: i32, msg: *const u8);
 
     /// If the registry already has the key `type_name`, returns `false`. Otherwise, creates a new table to be used as a metatable for userdata, adds it to the registry with key `type_name`, and returns `true`.
     ///
