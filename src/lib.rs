@@ -375,7 +375,7 @@ extern "C" {
 
     /// Generates a Lua error. The error message (which can actually be a Lua value of any type) must be on the stack top. This function does a long jump, and therefore never returns. (see [`luaL_error`](https://www.lua.org/manual/5.1/manual.html#luaL_error)).
     #[link_name = "lua_error"]
-    pub fn error(state: lua_State) -> i32;
+    pub fn error(state: lua_State) -> !;
     // #[link_name = "lua_next"]
     // fn lua_next(state: lua_State, index: i32) -> i32;
     // #[link_name = "lua_concat"]
@@ -422,7 +422,7 @@ extern "C" {
     pub fn Lcheckany(state: lua_State, index: i32);
     /// Raises an error with the following message, where `func` is retrieved from the call stack
     #[link_name = "luaL_argerror"]
-    pub fn Largerror(state: lua_State, cond: bool, index: i32, msg: *const u8);
+    pub fn Largerror(state: lua_State, index: i32, msg: *const u8) -> !;
 
     /// If the registry already has the key `type_name`, returns `false`. Otherwise, creates a new table to be used as a metatable for userdata, adds it to the registry with key `type_name`, and returns `true`.
     ///
@@ -447,7 +447,7 @@ extern "C" {
     ///
     /// This function never returns, but it is an idiom to use it in C functions as `return luaL_error(args)`.
     #[link_name = "luaL_error"]
-    pub fn Lerror(state: lua_State, fmt: *const u8, ...) -> i32;
+    pub fn Lerror(state: lua_State, fmt: *const u8, ...) -> !;
 
     /// Loads a buffer as a Lua chunk. This function uses [`lua_load`](https://www.lua.org/manual/5.1/manual.html#lua_load) to load the chunk in the buffer pointed to by `buffer` with size `size`.
     /// 
