@@ -508,7 +508,6 @@ where
                 );
                 std::mem::drop(error_str);
                 error(state);
-                unreachable_unchecked();
             }
         }
     }
