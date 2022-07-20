@@ -1,6 +1,6 @@
 #![allow(non_camel_case_types)]
 
-use std::{ffi::c_void, hint::unreachable_unchecked, ptr::null_mut};
+use std::{ffi::c_void, ptr::null_mut};
 
 mod loadx;
 pub use loadx::loadx;
@@ -18,21 +18,21 @@ macro_rules! pop {
 #[macro_export]
 macro_rules! getglobal {
     ($L:expr, $s:expr) => {
-        $crate::lua_getfield($L, $crate::GLOBALSINDEX, $s)
+        $crate::getfield($L, $crate::GLOBALSINDEX, $s)
     };
 }
 
 #[macro_export]
 macro_rules! setglobal {
     ($L:expr, $s:expr) => {
-        $crate::lua_setfield($L, $crate::GLOBALSINDEX, $s)
+        $crate::setfield($L, $crate::GLOBALSINDEX, $s)
     };
 }
 
 #[macro_export]
 macro_rules! upvalueindex {
     ($index:expr) => {
-        (-10002) - ($index)
+        $crate::GLOBALSINDEX - ($index)
     };
 }
 
