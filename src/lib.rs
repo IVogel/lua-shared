@@ -454,6 +454,29 @@ extern "C" {
     /// This function returns the same results as [`lua_load`](https://www.lua.org/manual/5.1/manual.html#lua_load). `name` is the chunk name, used for debug information and error messages. The string mode works as in function [`lua_load`](https://www.lua.org/manual/5.1/manual.html#lua_load). 
     #[link_name = "luaL_loadbufferx"]
     pub fn Lloadbufferx(state: lua_State, buffer: *const u8, size: usize, name: *const u8, mode: *const u8) -> Status;
+
+    /// Opens all standard Lua libraries into the given state.
+    #[link_name = "luaL_openlibs"]
+    pub fn Lopenlibs(state: lua_State);
+
+    #[link_name = "luaopen_base"]
+    pub fn open_base(state: lua_State) -> i32;
+    #[link_name = "luaopen_package"]
+    pub fn open_package(state: lua_State) -> i32;
+    #[link_name = "luaopen_math"]
+    pub fn open_math(state: lua_State) -> i32;
+    #[link_name = "luaopen_bit"]
+    pub fn open_bit(state: lua_State) -> i32;
+    #[link_name = "luaopen_string"]
+    pub fn open_string(state: lua_State) -> i32;
+    #[link_name = "luaopen_table"]
+    pub fn open_table(state: lua_State) -> i32;
+    #[link_name = "luaopen_os"]
+    pub fn open_os(state: lua_State) -> i32;
+    #[link_name = "luaopen_debug"]
+    pub fn open_debug(state: lua_State) -> i32;
+    #[link_name = "luaopen_jit"]
+    pub fn open_jit(state: lua_State) -> i32;
 }
 
 /// Pushes rust function/closure to lua stack.
