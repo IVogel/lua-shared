@@ -450,10 +450,16 @@ extern "C" {
     pub fn Lerror(state: lua_State, fmt: *const u8, ...) -> !;
 
     /// Loads a buffer as a Lua chunk. This function uses [`lua_load`](https://www.lua.org/manual/5.1/manual.html#lua_load) to load the chunk in the buffer pointed to by `buffer` with size `size`.
-    /// 
-    /// This function returns the same results as [`lua_load`](https://www.lua.org/manual/5.1/manual.html#lua_load). `name` is the chunk name, used for debug information and error messages. The string mode works as in function [`lua_load`](https://www.lua.org/manual/5.1/manual.html#lua_load). 
+    ///
+    /// This function returns the same results as [`lua_load`](https://www.lua.org/manual/5.1/manual.html#lua_load). `name` is the chunk name, used for debug information and error messages. The string mode works as in function [`lua_load`](https://www.lua.org/manual/5.1/manual.html#lua_load).
     #[link_name = "luaL_loadbufferx"]
-    pub fn Lloadbufferx(state: lua_State, buffer: *const u8, size: usize, name: *const u8, mode: *const u8) -> Status;
+    pub fn Lloadbufferx(
+        state: lua_State,
+        buffer: *const u8,
+        size: usize,
+        name: *const u8,
+        mode: *const u8,
+    ) -> Status;
 
     /// Opens all standard Lua libraries into the given state.
     #[link_name = "luaL_openlibs"]
@@ -542,8 +548,7 @@ where
         where
             FUNC: 'static + FnMut(lua_State) -> Result,
         {
-            let callback_ptr = touserdata(state, 1);
-            let _ = callback_ptr.cast::<FUNC>().read();
+            touserdata(state, 1).cast::<FUNC>().drop_in_place();
             0
         }
         createtable(state, 0, 1);
