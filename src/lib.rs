@@ -122,7 +122,7 @@ extern "C" {
 
     /// Returns the index of the top element in the stack. Because indices start at 1, this result is equal to the number of elements in the stack; in particular, 0 means an empty stack.
     #[link_name = "lua_gettop"]
-    pub fn gettop(state: lua_State);
+    pub fn gettop(state: lua_State) -> i32;
     /// Accepts any index, or 0, and sets the stack top to this index.
     /// If the new top is larger than the old one, then the new elements are filled with **nil**. If index is 0, then all stack elements are removed.
     #[link_name = "lua_settop"]
