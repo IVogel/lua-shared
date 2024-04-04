@@ -9,7 +9,7 @@ use lua::cstr;
 use std::ffi::c_void;
 
 #[no_mangle]
-unsafe extern "C" fn fngmod13_open(state: *mut c_void) -> i32 {
+unsafe extern "C" fn gmod13_open(state: *mut c_void) -> i32 {
 	lua::createtable(state, 0, 2);
 	lua::pushfunction(state, |_| {
 		println!("Hello there!");
