@@ -2,3 +2,8 @@
 name = "lua-shared"
 version = "0.1.0"
 edition = "2021"
+description = "Really simple wrapper around lua_shared(_srv) that tries not to be a total burden when interfacing with gmod's lua."
+license = "WTFPL"
+keywords = ["garry's mod", "gmod", "glua", "lua_shared"]
+categories = ["external-ffi-bindings", "game-development"]
+repository = "https://github.com/IVogel/lua-shared"
